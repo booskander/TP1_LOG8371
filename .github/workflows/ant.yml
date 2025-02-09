@@ -12,27 +12,27 @@ jobs:
       image: eclipse-temurin:17-jdk
 
     steps:
-      - name: Checkout to repo
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Grant execute permission to Gradle wrapper
         run: chmod +x ./gradlew
 
-      - name: Set correct permissions
-        run: chmod -R +r .
+      - name: Fix file permissions
+        run: chmod -R +rX .
 
-      - name: Debug File Permissions
+      - name: Debug File System Access
         run: ls -lahR .
 
       - name: Verify Java version
         run: java -version
 
-      - name: Installing dependencies
+      - name: Install dependencies
         run: |
           apt-get update && apt-get install -y git unzip
 
-      - name: Gradle Dependencies
-        run: ./gradlew dependencies
+      - name: Run Tests with Coverage
+        run: ./gradlew test jacocoTestReport
 
       - name: Gradle build and test
         run: |
