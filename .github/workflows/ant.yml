@@ -38,3 +38,18 @@ jobs:
       - name: Build and Test
         run: ./gradlew test
 
+      - name: Report Test Results
+        uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: Unit Tests
+          path: build/test-results/test/*.xml
+          reporter: junit
+
+      - name: Upload Test Results Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results
+          path: |
+            build/test-results/test
+            build/reports/tests
