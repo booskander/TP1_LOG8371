@@ -1,55 +1,32 @@
-name: CI Pipeline
+name: sonar qube build and test
 
 on:
   push:
-    branches:
-      - master
-  pull_request:
     branches:
       - master
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    container:
+      image: eclipse-tumerin:17-jdk
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
+      - name: Checkout to repo
+        uses: actions/checkout@v4
 
-      - name: Set up JDK 17
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'adopt'
-          java-version: '17'
+      - name: installing dependencies
+        run: |
+          apt-get update && apt-get install -y git && apt-get install -y unzip
 
-      - name: Cache Gradle packages
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
+      - name: Gradle build and test
+        run: |
+          ./gradlew build -Dsonar.log.level=INFO --warning-mode-all | 
+          tee > (gzip -9 > ./build.log.gz) > build.log
 
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
-
-      - name: Build and Test
-        run: ./gradlew test
-
-      - name: Report Test Results
-        uses: dorny/test-reporter@v1
-        if: always()
-        with:
-          name: Unit Tests
-          path: build/test-results/test/*.xml
-          reporter: junit
-
-      - name: Upload Test Results Artifact
+      - name: Upload Log artifact
         uses: actions/upload-artifact@v4
         with:
-          name: test-results
-          path: |
-            build/test-results/test
-            build/reports/tests
+          name: build-log
+          path: ./build.log.gz
+          retention-days: 7
