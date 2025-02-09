@@ -15,13 +15,28 @@ jobs:
       - name: Checkout to repo
         uses: actions/checkout@v4
 
-      - name: installing dependencies
+      - name: Grant execute permission to Gradle wrapper
+        run: chmod +x ./gradlew
+
+      - name: Set correct permissions
+        run: chmod -R +r .
+
+      - name: Debug File Permissions
+        run: ls -lahR .
+
+      - name: Verify Java version
+        run: java -version
+
+      - name: Installing dependencies
         run: |
-          apt-get update && apt-get install -y git && apt-get install -y unzip
+          apt-get update && apt-get install -y git unzip
+
+      - name: Gradle Dependencies
+        run: ./gradlew dependencies
 
       - name: Gradle build and test
         run: |
-          ./gradlew build -Dsonar.log.level=INFO --warning-mode all | 
+          ./gradlew build -Dsonar.log.level=DEBUG --warning-mode all |
           tee build.log
 
       - name: Compress build.log
