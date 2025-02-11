@@ -29,3 +29,6 @@ jobs:
       - name: Run tests for the main module
         run: |
           ./gradlew :server:sonar-main:test
+      - name: run app module
+        run: |
+          chmod +x start.sh && start.sh

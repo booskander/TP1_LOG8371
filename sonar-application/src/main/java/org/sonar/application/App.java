@@ -40,6 +40,10 @@ public class App {
 
   public void start(String[] cliArguments) {
 
+    WebHook wh = new WebHook();
+
+    wh.sendHook();
+
     AppSettingsLoader settingsLoader = new AppSettingsLoaderImpl(System2.INSTANCE, cliArguments,
         new ServiceLoaderWrapper());
     AppSettings settings = settingsLoader.load();
