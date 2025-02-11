@@ -21,7 +21,7 @@ jobs:
           settings-path: ${{ github.workspace }}
 
       - name: Setup Gradle
-        uses: gradle/actions@V4
+        uses: gradle/actions/setup-gradle@v4
 
       - name: Build with Gradle while skipping tests
         run: ./gradlew build -x test
