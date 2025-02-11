@@ -19,6 +19,9 @@
  */
 package org.sonar.application;
 
+import static org.sonar.application.config.SonarQubeVersionHelper.getSonarqubeVersion;
+import static org.sonar.process.ProcessProperties.Property.CLUSTER_NAME;
+
 import org.slf4j.LoggerFactory;
 import org.sonar.application.command.CommandFactory;
 import org.sonar.application.command.CommandFactoryImpl;
@@ -29,9 +32,6 @@ import org.sonar.core.extension.ServiceLoaderWrapper;
 import org.sonar.process.System2;
 import org.sonar.process.SystemExit;
 
-import static org.sonar.application.config.SonarQubeVersionHelper.getSonarqubeVersion;
-import static org.sonar.process.ProcessProperties.Property.CLUSTER_NAME;
-
 public class App {
 
   private final SystemExit systemExit = new SystemExit();
@@ -39,19 +39,24 @@ public class App {
   private StopRequestWatcher hardStopRequestWatcher = null;
 
   public void start(String[] cliArguments) {
-    AppSettingsLoader settingsLoader = new AppSettingsLoaderImpl(System2.INSTANCE, cliArguments, new ServiceLoaderWrapper());
+
+    AppSettingsLoader settingsLoader = new AppSettingsLoaderImpl(System2.INSTANCE, cliArguments,
+        new ServiceLoaderWrapper());
     AppSettings settings = settingsLoader.load();
-    // order is important - logging must be configured before any other components (AppFileSystem, ...)
+    // order is important - logging must be configured before any other components
+    // (AppFileSystem, ...)
     AppLogging logging = new AppLogging(settings);
     logging.configure();
     AppFileSystem fileSystem = new AppFileSystem(settings);
 
-    try (AppState appState = new AppStateFactory(settings).create()) {
+    try (
+        AppState appState = new AppStateFactory(settings).create()) {
       appState.registerSonarQubeVersion(getSonarqubeVersion());
       appState.registerClusterName(settings.getProps().nonNullValue(CLUSTER_NAME.getKey()));
       AppReloader appReloader = new AppReloaderImpl(settingsLoader, fileSystem, appState, logging);
       fileSystem.reset();
-      CommandFactory commandFactory = new CommandFactoryImpl(settings.getProps(), fileSystem.getTempDir(), System2.INSTANCE);
+      CommandFactory commandFactory = new CommandFactoryImpl(settings.getProps(), fileSystem.getTempDir(),
+          System2.INSTANCE);
 
       try (ProcessLauncher processLauncher = new ProcessLauncherImpl(fileSystem.getTempDir())) {
         Scheduler scheduler = new SchedulerImpl(settings, appReloader, commandFactory, processLauncher, appState);

@@ -21,11 +21,11 @@ jobs:
           settings-path: ${{ github.workspace }}
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
+        uses: gradle/actions@V4
 
-      - name: Build with Gradle without test
+      - name: Build with Gradle while skipping tests
         run: ./gradlew build -x test
 
-      - name: Run tests for teh main module
+      - name: Run tests for the main module
         run: |
           ./gradlew :server:sonar-main:test
