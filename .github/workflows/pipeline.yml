@@ -19,16 +19,14 @@ jobs:
           distribution: "temurin"
           server-id: github
           settings-path: ${{ github.workspace }}
-
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
       - name: Build with Gradle while skipping tests
         run: ./gradlew build -x test
-
       - name: Run tests for the main module
         run: |
           ./gradlew :server:sonar-main:test
-      - name: run app module
+      - name: Start SonarQube
         run: |
-          chmod +x start.sh && start.sh
+          timeout 15s ./gradlew sonarqube

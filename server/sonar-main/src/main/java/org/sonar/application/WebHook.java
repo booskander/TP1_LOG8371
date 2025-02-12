@@ -6,7 +6,6 @@ import java.net.URL;
 
 public class WebHook {
 
-    // This method will be used to send the HTTP request. We will test it without actually sending requests.
     public int sendHttpRequest(String webhookUrl, String jsonPayload) throws Exception {
         URL url = new URL(webhookUrl);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
